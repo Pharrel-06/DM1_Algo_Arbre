@@ -6,6 +6,8 @@ typedef struct noeud {
     struct noeud *fg , *fd;
 } Noeud , * Arbre;
 
+Arbre alloue_noeud(int val);
+
 int est_abr_naif(Arbre a);
 
 int est_abr_definition_aux(Arbre a, int *min, int *max);

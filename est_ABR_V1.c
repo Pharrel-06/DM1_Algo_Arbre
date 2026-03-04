@@ -12,7 +12,30 @@ Arbre alloue_noeud(int val) {
     return nouv_noeud;
 }
 
-int est_abr_naif(Arbre a);
+int abr_min(Arbre a) { 
+    while (a->fg != NULL) 
+        a = a->fg; 
+    return a->valeur; 
+} 
+
+int abr_max(Arbre a) { 
+    while (a->fd != NULL) 
+        a = a->fd; 
+    return a->valeur;
+}
+
+int est_abr_naif(Arbre a) {
+    if (a == NULL)
+        return 1;
+    
+    if (a->fg != NULL && abr_max(a->fg) >= a->valeur)
+        return 0;
+    
+    if (a->fd != NULL && abr_min(a->fd) <= a->valeur)
+        return 0;
+    
+    return est_abr_naif(a->fg) && est_abr_naif(a->fd);
+}
 
 int est_abr_definition_aux(Arbre a, int *min, int *max);
 

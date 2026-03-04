@@ -12,31 +12,46 @@ Arbre alloue_noeud(int val) {
     return nouv_noeud;
 }
 
-int abr_min(Arbre a) { 
-    while (a->fg != NULL) 
-        a = a->fg; 
-    
-    return a->valeur; 
-} 
+int abr_min(Arbre a, long long *nb_visites) {
+    if (a == NULL)
+        return 0;  
 
-int abr_max(Arbre a) { 
-    while (a->fd != NULL) 
-        a = a->fd; 
-    
+    while (a->fg != NULL) {
+        (*nb_visites)++;   
+        a = a->fg;
+    }
+
+    (*nb_visites)++;       
     return a->valeur;
 }
 
-int est_abr_naif(Arbre a) {
+int abr_max(Arbre a, long long *nb_visites) {
+    if (a == NULL)
+        return 0;
+
+    while (a->fd != NULL) {
+        (*nb_visites)++;   
+        a = a->fd;
+    }
+
+    (*nb_visites)++;       
+    return a->valeur;
+}
+
+int est_abr_naif(Arbre a, long long *nb_visites) {
+
     if (a == NULL)
         return 1;
-    
-    if (a->fg != NULL && abr_max(a->fg) >= a->valeur)
+
+    (*nb_visites)++;  
+
+    if (a->fg != NULL && abr_max(a->fg, nb_visites) >= a->valeur)
         return 0;
-    
-    if (a->fd != NULL && abr_min(a->fd) <= a->valeur)
+
+    if (a->fd != NULL && abr_min(a->fd, nb_visites) <= a->valeur)
         return 0;
-    
-    return est_abr_naif(a->fg) && est_abr_naif(a->fd);
+
+    return est_abr_naif(a->fg, nb_visites) && est_abr_naif(a->fd, nb_visites);
 }
 
 int est_abr_definition_aux(Arbre a, int *min, int *max);

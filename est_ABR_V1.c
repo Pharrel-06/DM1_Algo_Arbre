@@ -15,12 +15,14 @@ Arbre alloue_noeud(int val) {
 int abr_min(Arbre a) { 
     while (a->fg != NULL) 
         a = a->fg; 
+    
     return a->valeur; 
 } 
 
 int abr_max(Arbre a) { 
     while (a->fd != NULL) 
         a = a->fd; 
+    
     return a->valeur;
 }
 

@@ -2,15 +2,6 @@
 #include <stdlib.h>
 #include "est_ABR.h"
 
-Arbre alloue_noeud(int val) {
-    Arbre nouv_noeud = (Arbre) malloc(sizeof(Noeud));
-    if (nouv_noeud) {
-        nouv_noeud->valeur = val;
-        nouv_noeud->fd = NULL;
-        nouv_noeud->fg = NULL;
-    }
-    return nouv_noeud;
-}
 
 int abr_min(Arbre a) {
     if (a == NULL)

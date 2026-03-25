@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "est_ABR.h"
+#include "genere_arbre_binaire.h"
 
 Arbre lire_arbre(FILE* fichier) {
     int val;
@@ -23,6 +24,16 @@ Arbre lire_arbre(FILE* fichier) {
     return noeud;
 }
 
+void affiche_prefixe(Arbre a) {
+    if (!a) {
+        printf("-1 ");
+        return;
+    }
+    printf("%d ", a->valeur);
+    affiche_prefixe(a->fg);
+    affiche_prefixe(a->fd);
+}
+
 
 int main(void) {
     Arbre arbre_abr, arbre_non_abr;
@@ -42,36 +53,57 @@ int main(void) {
     // Test des fonction sur le parcours infixe d'un arbre
     printf("Test des fonction sur le parcours infixe d'un arbre\n");
     // Il est ABR
-    if (est_abr_infixe(arbre_abr)) {
-            printf("L'arbre du fichier arbre 1 est ABR\n");
+    long long visites = 0;
+    if (est_abr_infixe(arbre_abr, &visites)) {
+            printf("L'arbre du fichier arbre 1 est ABR, visite = %lld\n", visites);
     }
     else {
-        printf("L'arbre du fichier arbre 1 n'est pas ABR\n");
+        printf("L'arbre du fichier arbre 1 n'est pas ABR, visite = %lld\n", visites);
     }
      // Il est pas ABR
-    if (est_abr_infixe(arbre_non_abr)) {
-            printf("L'arbre du fichier arbre 2 est ABR\n");
+    visites = 0;
+    if (est_abr_infixe(arbre_non_abr, &visites)) {
+            printf("L'arbre du fichier arbre 1 est ABR, visite = %lld\n", visites);
     }
     else {
-        printf("L'arbre du fichier arbre 2 n'est pas ABR\n");
+        printf("L'arbre du fichier arbre 1 n'est pas ABR, visite = %lld\n", visites);
     }
 
     // Test des fonction naives
     printf("\nTest des fonction naives\n");
+    visites = 0;
     // Il est ABR
-    if (est_abr_naif(arbre_abr)) {
-            printf("L'arbre du fichier arbre 1 est ABR\n");
+    if (est_abr_naif(arbre_abr, &visites)) {
+            printf("L'arbre du fichier arbre 1 est ABR, visite = %lld\n", visites);
     }
     else {
-        printf("L'arbre du fichier arbre 1 n'est pas ABR\n");
-    }
-     // Il est pas ABR
-    if (est_abr_naif(arbre_non_abr)) {
-            printf("L'arbre du fichier arbre 2 est ABR\n");
-    }
-    else {
-        printf("L'arbre du fichier arbre 2 n'est pas ABR\n");
+        printf("L'arbre du fichier arbre 1 n'est pas ABR, visite = %lld\n", visites);
     }
 
+    // Il est pas ABR
+    visites = 0;
+    if (est_abr_naif(arbre_non_abr, &visites)) {
+            printf("L'arbre du fichier arbre 1 est ABR, visite = %lld\n", visites);
+    }
+    else {
+        printf("L'arbre du fichier arbre 1 n'est pas ABR, visite = %lld\n", visites);
+    }
+
+    // Test fonction infixe vers préfixe complet
+    printf("\nTest de la fonction infixe vers préfixe complet\n");
+
+    int n = 10;
+    int* infixe = malloc(sizeof(int) * n);
+    int* prefixe = malloc(sizeof(int) * n);
+    for (int i = 0; i < n; i++) {
+        infixe[i] = i + 1;
+    }
+    parcours_infixe_2_prefixe_presque_complet(prefixe, infixe, n);
+    printf("Parcours préfixe d'un arbre à %d noeuds : ", n);
+    for (int i = 0; i < n; i++) {
+        printf("%d ", prefixe[i]);
+    }
+    printf("\n");
+    
     return 0;
 }

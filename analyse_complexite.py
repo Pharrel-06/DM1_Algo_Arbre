@@ -8,75 +8,93 @@ def lire_csv(nom_fichier):
         lst_données = [ligne for ligne in dico_données]
     return lst_données
 
-def recup_donnee_temps(methode, morpho, lst_données):
+def recup_donnee_temps(methode, morpho, lst_donnees):
     res_temps = []
-    for ligne in lst_données:
+    for ligne in lst_donnees:
         if ligne["Methode"] == methode and ligne["Morphologie"] == morpho:
             res_temps.append(ligne["Temps"])
     return res_temps
 
-def recup_donnee_visite(methode, morpho, lst_données):
+def recup_donnee_visite(methode, morpho, lst_donnees):
     res_visite = []
-    for ligne in lst_données:
+    for ligne in lst_donnees:
         if ligne["Methode"] == methode and ligne["Morphologie"] == morpho:
             res_visite.append(ligne["Nb_visites"])
     return res_visite
 
-def trace_courbe(axes, nb_axe_x, nb_axe_y, lst_tailles, lst_données, titre, echelle_y) :
-    axes[nb_axe_x, nb_axe_y].plot(lst_tailles, lst_données, label="temps")
-    axes[nb_axe_x, nb_axe_y].set_title(titre)
-    axes[nb_axe_x, nb_axe_y].set_xlabel("Taille")
-    axes[nb_axe_x, nb_axe_y].set_ylabel(echelle_y)
-    axes[nb_axe_x, nb_axe_y].legend()
+def trace_courbes_temps(ax, ax_ligne, ax_colonne, morpho, lst_donnees):
+    
+    données = recup_donnee_temps("naif", morpho, lst_donnees)
+    ax[ax_ligne, ax_colonne].plot(lst_tailles, données, marker='o', label="naif")
+    
+    données = recup_donnee_temps("definition", morpho, lst_donnees)
+    ax[ax_ligne, ax_colonne].plot(lst_tailles, données, marker='o', label="definition")
+
+    données = recup_donnee_temps("infixe", morpho, lst_donnees)
+    ax[ax_ligne, ax_colonne].plot(lst_tailles, données, marker='o', label="infixe")
+
+    ax[ax_ligne, ax_colonne].xaxis.set_major_locator(plt.MaxNLocator(8))
+    ax[ax_ligne, ax_colonne].yaxis.set_major_locator(plt.MaxNLocator(6))
+    
+    ax[ax_ligne, ax_colonne].set_xlabel("Taille")
+    ax[ax_ligne, ax_colonne].set_ylabel("Temps en ms")
+
+    ax[ax_ligne, ax_colonne].legend()
+    ax[ax_ligne, ax_colonne].grid()
+
+    ax[ax_ligne, ax_colonne].set_title(morpho)
+
+def trace_courbes_visite(ax, ax_ligne, ax_colonne, morpho, lst_donnees):
+    
+    données = recup_donnee_visite("naif", morpho, lst_donnees)
+    ax[ax_ligne, ax_colonne].plot(lst_tailles, données, marker='o', label="naif")
+    
+    données = recup_donnee_visite("definition", morpho, lst_donnees)
+    ax[ax_ligne, ax_colonne].plot(lst_tailles, données, marker='o', label="definition")
+
+    données = recup_donnee_visite("infixe", morpho, lst_donnees)
+    ax[ax_ligne, ax_colonne].plot(lst_tailles, données, marker='o', label="infixe")
+
+    ax[ax_ligne, ax_colonne].xaxis.set_major_locator(plt.MaxNLocator(8))
+    ax[ax_ligne, ax_colonne].yaxis.set_major_locator(plt.MaxNLocator(6))
+    
+    ax[ax_ligne, ax_colonne].set_xlabel("Taille")
+    ax[ax_ligne, ax_colonne].set_ylabel("Nb visite")
+
+    ax[ax_ligne, ax_colonne].legend()
+    ax[ax_ligne, ax_colonne].grid()
+
+    ax[ax_ligne, ax_colonne].set_title(morpho)
+
 
 if __name__ == "__main__":
     lst_tailles = [] # Liste du nombre de noeud par test
     lst_methodes = set() # Liste avec le nom de toute les méthode utilisé
     lst_morpho = set()
 
-    lst_données = lire_csv("mesures.csv")
+    lst_donnees = lire_csv("mesures.csv")
 
     # Réccupération de toute les tailles et méthodes utilisés
-    for ligne in lst_données:
+    for ligne in lst_donnees:
         if ligne["Taille"] not in lst_tailles :
             lst_tailles.append(ligne["Taille"])
         lst_methodes.add(ligne["Methode"])
         lst_morpho.add(ligne["Morphologie"])
 
+    fig, ax = plt.subplots(2, 3, figsize=(12, 8))
+    
+    trace_courbes_temps(ax, 0, 0, "ABR_complet", lst_donnees)
+    trace_courbes_temps(ax, 0, 1, "ABR_filiforme", lst_donnees)
+    trace_courbes_temps(ax, 0, 2, "ABR_quelconque", lst_donnees)
 
-    plt.plot(lst_tailles, recup_donnee_temps("naif", "ABR_complet", lst_données), marker='o')
-    plt.grid()
+    trace_courbes_visite(ax, 1, 0, "ABR_complet", lst_donnees)
+    trace_courbes_visite(ax, 1, 1, "ABR_filiforme", lst_donnees)
+    trace_courbes_visite(ax, 1, 2, "ABR_quelconque", lst_donnees)
+
+    plt.tight_layout()
+    plt.subplots_adjust(hspace=0.4, wspace=0.3)
+
     plt.show()
     
-    # fig, axes = plt.subplots(2, 3, figsize=(10, 8))
-
-
-    # # ABR complet
-    # for methode in lst_methodes:
-    #     trace_courbe(axes, 0, 0, lst_tailles, recup_donnee_temps(methode, "ABR_complet", lst_données), "ABR_complet", "Temps (s)")
-    # # non ABR complet
-    # for methode in lst_methodes:
-    #     trace_courbe(axes, 1, 0, lst_tailles, recup_donnee_temps(methode, "non_ABR_complet", lst_données), "non_ABR_complet", "Temps (s)")
-
-    # # ABR filiforme
-    # for methode in lst_methodes:
-    #     trace_courbe(axes, 0, 1, lst_tailles, recup_donnee_temps(methode, "ABR_filiforme", lst_données), "ABR_filiforme", "Temps (s)")
-    # # non ABR filiforme
-    # for methode in lst_methodes:
-    #     trace_courbe(axes, 1, 1, lst_tailles, recup_donnee_temps(methode, "non_ABR_filiforme", lst_données), "non_ABR_filiforme", "Temps (s)")
-
-    # # ABR quelconque
-    # for methode in lst_methodes:
-    #     trace_courbe(axes, 0, 2, lst_tailles, recup_donnee_temps(methode, "ABR_quelconque", lst_données), "ABR_quelconque", "Temps (s)")
-    # # non ABR quelconque
-    # for methode in lst_methodes:
-    #     trace_courbe(axes, 1, 2, lst_tailles, recup_donnee_temps(methode, "non_ABR_quelconque", lst_données), "non_ABR_quelconque", "Temps (s)")
     
-    # plt.show()
-
-
-            
-
-
-
 

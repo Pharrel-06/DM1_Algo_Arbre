@@ -5,6 +5,8 @@
 
 Arbre alloue_noeud(int val);
 
+void detruit_arbre(Arbre * a);
+
 int construit_quelconque(Arbre * a, int ** codage, int n);
 
 void parcours_infixe_2_prefixe_presque_complet(int * prefixe, int * infixe, int n);

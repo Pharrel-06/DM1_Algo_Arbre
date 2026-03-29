@@ -23,8 +23,7 @@ void detruit_arbre(Arbre * a) {
 }
 
 int construit_quelconque_rec(Arbre * a, int ** codage, int *n) {
-    if (*n < 0) {
-        
+    if (*n <= 0) {
         return 0;
     }
 
@@ -64,54 +63,285 @@ int construit_quelconque(Arbre * a, int ** codage, int n) {
 }
 
 int nb_noeuds_gauche(int n) {
-    /* Calcule de la hauteur en faisant des divisions successive par 2 */
-    int tmp = n;
+    if (n <= 1) return 0;
+
+    int puissance = 1;
     int hauteur = 0;
-    while (tmp > 1) {
-        tmp /= 2;
+    while (puissance * 2 <= n) {
+        puissance *= 2;
         hauteur++;
     }
-    /* Calcule du nombre de noeud dans la partie complète de l'arbre */
-    int nb_noeud_etage = 0;
-    int puissance_de_2 = 1;
-    for (int i = 0; i < hauteur; i++) {
-        nb_noeud_etage += puissance_de_2;
-        puissance_de_2 *= 2;
+
+    int nb_dernier = n - (puissance - 1);
+    int max_gauche_dernier = puissance / 2;
+    int noeuds_gauche_complet = (puissance / 2) - 1;
+
+    if (nb_dernier >= max_gauche_dernier) {
+        return noeuds_gauche_complet + max_gauche_dernier;
+    } 
+    return noeuds_gauche_complet + nb_dernier;
+}
+
+void parcours_infixe_2_prefixe_presque_complet_aux(int ** prefixe, int * infixe, int n) {
+    if (n == 0) {
+        (**prefixe)  = -1;
+        (*prefixe)++;
+        return;
     }
-    /* Calcule du nombre de noeud dans la partie potentiellement imcomplète de l'arbre (dernier étage) */
-    int nb_dernier_etage = n - nb_noeud_etage;
-    /* Si le nombre de noeud au dernier étage est plus grand que le nombre de noeud max / 2, on renvoie max / 2*/
-    if (nb_dernier_etage > puissance_de_2 / 2) {
-        return puissance_de_2 / 2 + nb_noeud_etage / 2;
-    }
-    /* Sinon, on renvoie le nombre de noeud au dernier étage */
-    return nb_dernier_etage + nb_noeud_etage / 2;
+    int nb_gauche = nb_noeuds_gauche(n);
+    int nb_droite = n - nb_gauche - 1;
+    (**prefixe) = infixe[nb_gauche];
+    (*prefixe)++;
+
+    parcours_infixe_2_prefixe_presque_complet_aux(prefixe, infixe, nb_gauche);
+
+    parcours_infixe_2_prefixe_presque_complet_aux(prefixe, infixe + nb_gauche + 1, nb_droite);
 }
 
 void parcours_infixe_2_prefixe_presque_complet(int * prefixe, int * infixe, int n) {
-    int nb_gauche = nb_noeuds_gauche(n);
-    int nb_droite = n - nb_gauche - 1;
-    prefixe[0] = infixe[nb_gauche];
-    if (nb_gauche > 0) {
-        parcours_infixe_2_prefixe_presque_complet(prefixe + 1, infixe, nb_gauche);
-    }
-    if (nb_droite > 0) {
-        parcours_infixe_2_prefixe_presque_complet(prefixe + nb_gauche + 1, infixe + nb_gauche + 1, nb_droite);
-    }
+    int* nouv_prefixe = prefixe;
+    parcours_infixe_2_prefixe_presque_complet_aux(&nouv_prefixe, infixe, n);
 }
 
-void parcours_infixe_2_prefixe_filiforme_aleatoire(int * prefixe, int * infixe, int n);
+void parcours_infixe_2_prefixe_filiforme_aleatoire_aux(int *prefixe, int *infixe, int n, int* pos) {
+    if (n <= 0) {
+        prefixe[*pos] = -1;
+        (*pos)++;
+        return;
+    }
 
-void parcours_infixe_2_prefixe_quelconque_aleatoire(int * codage, int * infixe, int n);
+    int gauche = rand() % 2;
+    int nb_g;
+    if (gauche) {
+        nb_g = n - 1;
+    } else {
+        nb_g = 0;
+    }
 
-int ABR_presque_complet_alea(Arbre * a, int taille);
+    prefixe[*pos] = infixe[nb_g];
+    (*pos)++;
 
-int non_ABR_presque_complet_alea(Arbre * a, int taille);
+    // Sous-arbre gauche
+    parcours_infixe_2_prefixe_filiforme_aleatoire_aux(prefixe, infixe, nb_g, pos);
 
-int ABR_filiforme_alea(Arbre * a, int taille);
+    // Sous-arbre droit
+    parcours_infixe_2_prefixe_filiforme_aleatoire_aux(prefixe, infixe + nb_g + 1, n - nb_g - 1, pos);
+}
 
-int non_ABR_filiforme_alea(Arbre * a, int taille);
+void parcours_infixe_2_prefixe_filiforme_aleatoire(int *prefixe, int *infixe, int n) {
+    int pos = 0;
+    parcours_infixe_2_prefixe_filiforme_aleatoire_aux(prefixe, infixe, n, &pos);
+}
 
-int ABR_quelconque_alea(Arbre * a, int taille);
+void parcours_infixe_2_prefixe_quelconque_aleatoire(int *codage, int *infixe, int n) {
+    if (!n) {
+        codage[0] = -1; 
+        return;
+    }
 
-int non_ABR_quelconque_alea(Arbre * a, int taille);
+    int nb_g = rand() % n;
+    codage[0] = infixe[nb_g];
+
+    parcours_infixe_2_prefixe_quelconque_aleatoire(
+        codage + 1,
+        infixe,
+        nb_g
+    );
+
+    parcours_infixe_2_prefixe_quelconque_aleatoire(
+        codage + 1 + (2 * nb_g + 1),
+        infixe + nb_g + 1,
+        n - nb_g - 1
+    );
+}
+
+int ABR_presque_complet_alea(Arbre * a, int taille) {
+    //*a = NULL;
+    if (taille <= 0) {
+        *a = NULL;
+        return 1;
+    }
+
+    int *infixe = (int*) malloc(taille * sizeof(int));
+    int *prefixe = (int*) malloc(((2 * taille) + 1) * sizeof(int));
+    int *prefixe_orig = prefixe;
+
+    if (!infixe || !prefixe) {
+        free(infixe);
+        free(prefixe);
+        return 0;
+    }
+
+    // infixe TRIÉ → ABR garanti
+    for (int i = 0; i < taille; i++)
+        infixe[i] = i + 1;
+
+    parcours_infixe_2_prefixe_presque_complet(prefixe, infixe, taille);
+
+    int res = construit_quelconque(a, &prefixe, (2 * taille) + 1); 
+
+    free(infixe);
+    free(prefixe_orig);
+
+    return res;
+}  
+
+int non_ABR_presque_complet_alea(Arbre * a, int taille) {
+    if (taille <= 0) {
+        *a = NULL;
+        return 1;
+    }
+
+    int *infixe = malloc(taille * sizeof(int));
+    int *prefixe = malloc((2 * taille + 1) * sizeof(int));
+    int *prefixe_orig = prefixe; 
+
+    if (!infixe || !prefixe) {
+        free(infixe);
+        free(prefixe);
+        return 0;
+    }
+
+    // tableau trié
+    for (int i = 0; i < taille; i++)
+        infixe[i] = i + 1;
+
+    // mélange (shuffle intégré)
+    for (int i = taille - 1; i > 0; i--) {
+        int j = rand() % (i + 1);
+        int tmp = infixe[i];
+        infixe[i] = infixe[j];
+        infixe[j] = tmp;
+    }
+
+    parcours_infixe_2_prefixe_presque_complet(prefixe, infixe, taille);
+
+    int res = construit_quelconque(a, &prefixe, 2 * taille + 1);
+
+    free(infixe);
+    free(prefixe_orig);
+
+    return res;
+}
+
+int ABR_filiforme_alea(Arbre * a, int taille) {
+    if (taille <= 0) {
+        *a = NULL;
+        return 1;
+    }
+
+    int *infixe = malloc(taille * sizeof(int));
+    int *prefixe = malloc(((2 * taille) + 1) * sizeof(int));
+
+    if (!infixe || !prefixe) {
+        free(infixe);
+        free(prefixe);
+        return 0;
+    }
+
+    for (int i = 0; i < taille; i++)
+        infixe[i] = i + 1;
+
+    parcours_infixe_2_prefixe_filiforme_aleatoire(prefixe, infixe, taille);
+
+    int *ptr = prefixe;
+    int res = construit_quelconque(a, &ptr, 2 * taille + 1);
+
+    free(infixe);
+    free(prefixe);
+
+    return res;
+}
+
+int non_ABR_filiforme_alea(Arbre * a, int taille) {
+    if (taille <= 0) {
+        *a = NULL;
+        return 1;
+    }
+
+    int *infixe = malloc(taille * sizeof(int));
+    int *prefixe = malloc((2 * taille + 1) * sizeof(int));
+
+    if (!infixe || !prefixe) {
+        free(infixe);
+        free(prefixe);
+        return 0;
+    }
+
+    for (int i = 0; i < taille; i++)
+        infixe[i] = i + 1;
+
+    for (int i = taille - 1; i > 0; i--) {
+        int j = rand() % (i + 1);
+        int tmp = infixe[i];
+        infixe[i] = infixe[j];
+        infixe[j] = tmp;
+    }
+
+    parcours_infixe_2_prefixe_filiforme_aleatoire(prefixe, infixe, taille);
+
+    int *ptr = prefixe;
+    int res = construit_quelconque(a, &ptr, 2 * taille + 1);
+
+    free(infixe);
+    free(prefixe);
+
+    return res;
+}
+
+int ABR_quelconque_alea(Arbre * a, int taille) {
+    if (taille <= 0) {
+        *a = NULL;
+        return 1;
+    }
+
+    int *infixe = malloc(taille * sizeof(int));
+    int *codage = malloc((2 * taille + 1) * sizeof(int));
+
+    if (!infixe || !codage) return 0;
+
+    for (int i = 0; i < taille; i++)
+        infixe[i] = i + 1;
+
+    parcours_infixe_2_prefixe_quelconque_aleatoire(codage, infixe, taille);
+
+    int *ptr = codage;
+    int res = construit_quelconque(a, &ptr, 2 * taille + 1);
+
+    free(infixe);
+    free(codage);
+
+    return res;
+}
+
+int non_ABR_quelconque_alea(Arbre * a, int taille) {
+    if (taille <= 0) {
+        *a = NULL;
+        return 1;
+    }
+
+    int *infixe = malloc(taille * sizeof(int));
+    int *codage = malloc((2 * taille + 1) * sizeof(int));
+
+    if (!infixe || !codage) return 0;
+
+    for (int i = 0; i < taille; i++)
+        infixe[i] = i + 1;
+
+    for (int i = taille - 1; i > 0; i--) {
+        int j = rand() % (i + 1);
+        int tmp = infixe[i];
+        infixe[i] = infixe[j];
+        infixe[j] = tmp;
+    }
+
+    parcours_infixe_2_prefixe_quelconque_aleatoire(codage, infixe, taille);
+
+    int *ptr = codage;
+    int res = construit_quelconque(a, &ptr, 2 * taille + 1);
+
+    free(infixe);
+    free(codage);
+
+    return res;
+}

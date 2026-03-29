@@ -44,9 +44,27 @@ int est_abr_naif(Arbre a, long long *nb_visites) {
     return est_abr_naif(a->fg, nb_visites) && est_abr_naif(a->fd, nb_visites);
 }
 
-int est_abr_definition_aux(Arbre a, int *min, int *max, long long * nb_visites);
+int est_abr_definition_aux(Arbre a, int *min, int *max, long long *nb_visites){
+    if (!a) return 1;
 
-int est_abr_definition(Arbre a, long long * nb_visites);
+    (*nb_visites)++;
+
+    int min_g, max_g, min_d, max_d;
+    if (!est_abr_definition_aux(a->fg, &min_g, &max_g, nb_visites)) return 0;
+    if (!est_abr_definition_aux(a->fd, &min_d, &max_d, nb_visites)) return 0;
+
+    if (a->fg && max_g >= a->valeur) return 0;
+    if (a->fd && min_d <= a->valeur) return 0;
+
+    *min = a->fg ?  min_g : a->valeur;
+    *max = a->fd ?  max_d : a->valeur; 
+    return 1; 
+}
+
+int est_abr_definition(Arbre a, long long *nb_visites){
+    int min, max;
+    return est_abr_definition_aux(a, &min, &max, nb_visites); 
+}
 
 int infixe_croissant(Arbre a, Noeud ** dernier_noeud, long long * nb_visites) {
     // Si l'arbre est vide, c'est un ABR

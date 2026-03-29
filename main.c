@@ -20,7 +20,7 @@ void test_performance(FILE* f, Arbre a, int taille, char* morpho) {
         est_abr_naif(a, &nb_visite);
     }
     clock_t fin = clock();
-    temps = ((double)(fin - debut) * 1000.0) / NB_TESTS;
+    temps = ((double)(fin - debut) * 1000.0) / CLOCKS_PER_SEC / NB_TESTS;
     ecrit_mesure(f, taille, morpho, "naif", nb_visite / NB_TESTS, temps);
 
     // Définition
@@ -30,7 +30,7 @@ void test_performance(FILE* f, Arbre a, int taille, char* morpho) {
         est_abr_definition(a, &nb_visite);
     }
     fin = clock();
-    temps = ((double)(fin - debut) * 1000.0) / NB_TESTS;
+    temps = ((double)(fin - debut) * 1000.0) / CLOCKS_PER_SEC / NB_TESTS;
     ecrit_mesure(f, taille, morpho, "definition", nb_visite / NB_TESTS, temps);
 
     // Infixe
@@ -40,7 +40,7 @@ void test_performance(FILE* f, Arbre a, int taille, char* morpho) {
         est_abr_infixe(a, &nb_visite);
     }
     fin = clock();
-    temps = ((double)(fin - debut) * 1000.0) / NB_TESTS;
+    temps = ((double)(fin - debut) * 1000.0) / CLOCKS_PER_SEC / NB_TESTS;
     ecrit_mesure(f, taille, morpho, "infixe", nb_visite / NB_TESTS, temps);
 }
 
